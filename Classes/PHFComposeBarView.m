@@ -297,7 +297,7 @@ static CGFloat kTextViewToSuperviewHeightDelta;
                                   20.0f);
         _charCountLabel = [[UILabel alloc] initWithFrame:frame];
         [_charCountLabel setHidden:![self maxCharCount]];
-        [_charCountLabel setTextAlignment:UITextAlignmentCenter];
+        [_charCountLabel setTextAlignment:NSTextAlignmentCenter];
         [_charCountLabel setBackgroundColor:[UIColor clearColor]];
         [_charCountLabel setFont:[UIFont boldSystemFontOfSize:[UIFont smallSystemFontSize]]];
         [_charCountLabel setTextColor:[UIColor colorWithWhite:0.5f alpha:1.0f]];
@@ -396,7 +396,19 @@ static CGFloat kTextViewToSuperviewHeightDelta;
         [_placeholderLabel setTextColor:[UIColor colorWithWhite:0.67f alpha:1.0f]];
         [_placeholderLabel setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
         [_placeholderLabel setAdjustsFontSizeToFitWidth:YES];
-        [_placeholderLabel setMinimumFontSize:[UIFont smallSystemFontSize]];
+        if ([_placeholderLabel respondsToSelector:@selector(setMinimumScaleFactor:)]) {
+            [_placeholderLabel setMinimumScaleFactor:([UIFont smallSystemFontSize]/[[_placeholderLabel font] pointSize])];
+        } else if ([_placeholderLabel respondsToSelector:@selector(setMinimumFontSize:)]) {
+            // Support dynamic font sizing (minimum font size) functionality in iOS 5 - setMinimumFontSize: was deprecated in iOS 6.
+            // When iOS 5 is no longer supported, this can be removed.
+            NSMethodSignature *signature = [_placeholderLabel methodSignatureForSelector:@selector(setMinimumFontSize:)];
+            NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
+            [invocation setTarget:_placeholderLabel];
+            [invocation setSelector:@selector(setMinimumFontSize:)];
+            CGFloat fontSize = [UIFont smallSystemFontSize];
+            [invocation setArgument:&fontSize atIndex:([signature numberOfArguments] - 1)];
+            [invocation invoke];
+        }
     }
 
     return _placeholderLabel;
