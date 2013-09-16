@@ -401,13 +401,10 @@ static CGFloat kTextViewToSuperviewHeightDelta;
         } else if ([_placeholderLabel respondsToSelector:@selector(setMinimumFontSize:)]) {
             // Support dynamic font sizing (minimum font size) functionality in iOS 5 - setMinimumFontSize: was deprecated in iOS 6.
             // When iOS 5 is no longer supported, this can be removed.
-            NSMethodSignature *signature = [_placeholderLabel methodSignatureForSelector:@selector(setMinimumFontSize:)];
-            NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-            [invocation setTarget:_placeholderLabel];
-            [invocation setSelector:@selector(setMinimumFontSize:)];
-            CGFloat fontSize = [UIFont smallSystemFontSize];
-            [invocation setArgument:&fontSize atIndex:([signature numberOfArguments] - 1)];
-            [invocation invoke];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+            [_placeholderLabel setMinimumFontSize:[UIFont smallSystemFontSize]];
+#pragma clang diagnostic pop
         }
     }
 
